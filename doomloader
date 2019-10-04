@@ -1,0 +1,62 @@
+#!/bin/bash
+GZDOOMPATH=/home/oliv/.config/gzdoom
+WADS=/home/oliv/.config/gzdoom/WADS/
+MODS=/home/oliv/.config/gzdoom/MODS/
+commande="/usr/bin/gzdoom"
+
+cpt=0
+
+declare -A tabwads
+
+search (){
+  for i in $(ls $GZDOOMPATH/$1);
+  do
+    tabwad[$cpt]=$i
+    cpt=$(($cpt + 1 ))
+  done
+}
+search "MODS"
+cptmod=$cpt
+
+search "WADS"
+
+echo "==========================================================================="
+figlet -t -k -f /usr/share/figlet/fonts/doom.flf  "DOOMLOADER"
+echo "==========================================================================="
+
+echo  "MODS"
+for K in "${!tabwad[@]}"
+do
+  if [ $K -eq $cptmod ]
+  then
+    echo -e "\t"
+    echo  "WADS:"
+  fi
+  echo "$K)  ${tabwad[$K]}"
+done
+echo -e "\t"
+read -p "Wads/Mods? (q pour quitter): " options
+IFS=' '
+read -ra ARR <<< $options
+if [ $ARR == "q" ]
+then
+  exit
+fi
+for F in "${ARR[@]}";
+do
+
+  if [ $F -le $cptmod ]
+  then
+    commande="$commande -file $MODS${tabwad[$F]}"
+  else
+    commande="$commande -file $WADS${tabwad[$F]}"
+  fi
+done
+echo "$commande"
+read -p "Commande ok? (q pour quitter):" rep
+if [ $rep == "q" ]
+then
+  exit
+else
+  $commande &
+fi
